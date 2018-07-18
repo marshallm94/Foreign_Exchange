@@ -1,5 +1,6 @@
 import requests
 import json
+import pandas as pd
 
 
 if __name__ == "__main__":
@@ -9,15 +10,34 @@ if __name__ == "__main__":
 
     link = "https://www.alphavantage.co/query"
 
-    params = {
-        "function": "CURRENCY_EXCHANGE_RATE",
-        "from_currency": "EUR",
-        "to_currency": "USD",
-        "apikey": api_key
+    results_dict = {
+        "from_currency_code": [],
+        "from_currency_name": [],
+        "to_currency_code": [],
+        "to_currency_name": [],
+        "exchange_rate": [],
+        "last_refreshed": [],
+        "time_zone": []
     }
 
-    response = requests.get(link, params)
-    data = response.json()['Realtime Currency Exchange Rate']
-    for key, value in data.items():
-        new_key = key[3:].lower().replace(" ", "_")
-        print(new_key, ":", value)
+    currencies = set(['EUR','JPY','GBP','CHF'])
+
+    for currency in currencies:
+        params = {
+            "function": "CURRENCY_EXCHANGE_RATE",
+            "to_currency": "USD",
+            "apikey": api_key
+        }
+        params['from_currency'] = currency
+        response = requests.get(link, params)
+        print(response.json())
+        result = response.json()['Realtime Currency Exchange Rate']
+        results_dict['from_currency_code'].append(result['1. From_Currency Code'])
+        results_dict['from_currency_name'].append(result['2. From_Currency Name'])
+        results_dict['to_currency_code'].append(result['3. To_Currency Code'])
+        results_dict['to_currency_name'].append(result['4. To_Currency Name'])
+        results_dict['exchange_rate'].append(float(result['5. Exchange Rate']))
+        results_dict['last_refreshed'].append(result['6. Last Refreshed'])
+        results_dict['time_zone'].append(result['7. Time Zone'])
+
+    df = pd.DataFrame(results_dict, index=list(range(4)))
