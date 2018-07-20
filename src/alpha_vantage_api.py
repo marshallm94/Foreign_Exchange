@@ -1,6 +1,7 @@
 import requests
 import json
 import pandas as pd
+import psycopg2
 
 
 if __name__ == "__main__":
@@ -41,3 +42,16 @@ if __name__ == "__main__":
         results_dict['time_zone'].append(result['7. Time Zone'])
 
     df = pd.DataFrame(results_dict, index=list(range(4)))
+
+    connection = psycopg2.connect(dbname='foreign_exchange', user='admin')
+    cursor = connection.cursor()
+
+    cursor.execture("""
+    CREATE TABLE IF NOT EXISTS foreign_exchange
+
+
+    """)
+
+    connection.commit()
+    cursor.close()
+    connection.clost()
