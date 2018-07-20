@@ -1,7 +1,51 @@
+import time
 import requests
 import json
-import pandas as pd
 import psycopg2
+
+
+def format_api_response(from_curr_code, to_curr_code='USD', link="https://www.alphavantage.co/query"):
+    '''
+    Formats the response from the Alpha Vantage API.
+
+    Parameters:
+    ----------
+    from_curr_code : (str)
+        The currency code of the currency for which the exchange rate
+        should be retrieved (relative to USD)
+    to_curr_code : (str)
+        The currency code of the currency for which from_curr_code should
+        be compared to
+    link : (str)
+        API link (default is Alpha Vantage API)
+
+    Returns:
+    ----------
+    results_dict : (dictionary)
+        Dictionary formatted with exchange rate information for the inputted
+        currency codes
+    '''
+    results_dict = {}
+
+    params = {
+        "function": "CURRENCY_EXCHANGE_RATE",
+        "to_currency": "USD",
+        "apikey": api_key
+    }
+    params['from_currency'] = from_curr_code
+
+    response = requests.get(link, params)
+
+    result = response.json()['Realtime Currency Exchange Rate']
+    results_dict['from_currency_code'] = result['1. From_Currency Code']
+    results_dict['from_currency_name'] = result['2. From_Currency Name']
+    results_dict['to_currency_code'] = result['3. To_Currency Code']
+    results_dict['to_currency_name'] = result['4. To_Currency Name']
+    results_dict['exchange_rate'] = float(result['5. Exchange Rate'])
+    results_dict['last_refreshed'] = result['6. Last Refreshed']
+    results_dict['time_zone'] = result['7. Time Zone']
+
+    return results_dict
 
 
 if __name__ == "__main__":
@@ -9,49 +53,37 @@ if __name__ == "__main__":
         data = json.load(f)
         api_key = data['api']
 
-    link = "https://www.alphavantage.co/query"
-
-    results_dict = {
-        "from_currency_code": [],
-        "from_currency_name": [],
-        "to_currency_code": [],
-        "to_currency_name": [],
-        "exchange_rate": [],
-        "last_refreshed": [],
-        "time_zone": []
-    }
+    connection = psycopg2.connect(dbname='foreign_exchange_application', user='postgres', host='/tmp')
 
     currencies = set(['EUR','JPY','GBP','CHF'])
-
-    for currency in currencies:
-        params = {
-            "function": "CURRENCY_EXCHANGE_RATE",
-            "to_currency": "USD",
-            "apikey": api_key
-        }
-        params['from_currency'] = currency
-        response = requests.get(link, params)
-        print(response.json())
-        result = response.json()['Realtime Currency Exchange Rate']
-        results_dict['from_currency_code'].append(result['1. From_Currency Code'])
-        results_dict['from_currency_name'].append(result['2. From_Currency Name'])
-        results_dict['to_currency_code'].append(result['3. To_Currency Code'])
-        results_dict['to_currency_name'].append(result['4. To_Currency Name'])
-        results_dict['exchange_rate'].append(float(result['5. Exchange Rate']))
-        results_dict['last_refreshed'].append(result['6. Last Refreshed'])
-        results_dict['time_zone'].append(result['7. Time Zone'])
-
-    df = pd.DataFrame(results_dict, index=list(range(4)))
-
-    connection = psycopg2.connect(dbname='foreign_exchange', user='admin')
-    cursor = connection.cursor()
-
-    cursor.execture("""
-    CREATE TABLE IF NOT EXISTS foreign_exchange
-
-
-    """)
+    for curr in currencies:
+        results_dict = format_api_response(curr)
+        print(results_dict)
+        with connection.cursor() as cursor:
+            cursor.execute("""
+            INSERT INTO public.foreign_exchange
+                (from_currency_code,
+                from_currency_name,
+                to_currency_code,
+                to_currency_name,
+                exchange_rate,
+                last_refreshed,
+                time_zone) VALUES
+                ('{}',
+                 '{}',
+                 '{}',
+                 '{}',
+                 '{}',
+                 '{}',
+                 '{}')
+            """.format(results_dict["from_currency_code"],
+                       results_dict["from_currency_name"],
+                       results_dict["to_currency_code"],
+                       results_dict["to_currency_name"],
+                       results_dict["exchange_rate"],
+                       results_dict["last_refreshed"],
+                       results_dict["time_zone"]))
+        time.sleep(30)
 
     connection.commit()
-    cursor.close()
-    connection.clost()
+    connection.close()
