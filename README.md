@@ -1,2 +1,2 @@
 # Foreign_Exchange
-Python based application for FX Forecasting Application
+Python based Foreign Exchange Forecasting Application
