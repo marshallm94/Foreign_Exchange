@@ -1,4 +1,3 @@
-import time
 import requests
 import json
 import psycopg2
@@ -36,7 +35,7 @@ def format_api_response(from_curr_code, to_curr_code='USD', link="https://www.al
 
     response = requests.get(link, params)
 
-    result = response.json()['Realtime Currency Exchange Rate']
+    result = response.json().get('Realtime Currency Exchange Rate', 'API Call Frequency Exceeded')
     results_dict['from_currency_code'] = result['1. From_Currency Code']
     results_dict['from_currency_name'] = result['2. From_Currency Name']
     results_dict['to_currency_code'] = result['3. To_Currency Code']
@@ -58,7 +57,6 @@ if __name__ == "__main__":
     currencies = set(['EUR','JPY','GBP','CHF'])
     for curr in currencies:
         results_dict = format_api_response(curr)
-        print(results_dict)
         with connection.cursor() as cursor:
             cursor.execute("""
             INSERT INTO public.foreign_exchange
@@ -83,7 +81,6 @@ if __name__ == "__main__":
                        results_dict["exchange_rate"],
                        results_dict["last_refreshed"],
                        results_dict["time_zone"]))
-        time.sleep(30)
 
     connection.commit()
     connection.close()
