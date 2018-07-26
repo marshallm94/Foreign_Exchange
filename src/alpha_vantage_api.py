@@ -1,6 +1,8 @@
 import requests
 import json
 import psycopg2
+import time
+import pandas as pd
 
 
 def format_api_response(from_curr_code, to_curr_code='USD', link="https://www.alphavantage.co/query"):
@@ -52,14 +54,18 @@ if __name__ == "__main__":
         data = json.load(f)
         api_key = data['api']
 
-    connection = psycopg2.connect(dbname='foreign_exchange_application', user='postgres', host='/tmp')
+    connection = psycopg2.connect(host='foreign-exchange.cknsthfbpmik.us-east-1.rds.amazonaws.com',
+                         dbname='forex',
+                         user='awsuser',
+                         port='5432',
+                         password='foreignexchange')
 
     currencies = set(['EUR','JPY','GBP','CHF'])
     for curr in currencies:
         results_dict = format_api_response(curr)
         with connection.cursor() as cursor:
             cursor.execute("""
-            INSERT INTO public.foreign_exchange
+            INSERT INTO public.majors
                 (from_currency_code,
                 from_currency_name,
                 to_currency_code,
@@ -73,7 +79,7 @@ if __name__ == "__main__":
                  '{}',
                  '{}',
                  '{}',
-                 '{}')
+                 '{}');
             """.format(results_dict["from_currency_code"],
                        results_dict["from_currency_name"],
                        results_dict["to_currency_code"],
@@ -81,6 +87,7 @@ if __name__ == "__main__":
                        results_dict["exchange_rate"],
                        results_dict["last_refreshed"],
                        results_dict["time_zone"]))
+        time.sleep(30)
 
     connection.commit()
     connection.close()
