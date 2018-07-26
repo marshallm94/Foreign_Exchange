@@ -1,6 +1,15 @@
-psql \
-   --host=postgresql-test.cknsthfbpmik.us-east-1.rds.amazonaws.com \
-   --port=5432 \
-   --username=awsuser \
-   --password \
-   --dbname=testdatabase
+aws rds create-db-instance \
+    --db-name forex \
+    --db-instance-identifier foreign-exchange \
+    --allocated-storage 25 \
+    --db-instance-class db.t2.small \
+    --engine postgres \
+    --master-username awsuser \
+    --master-user-password foreignexchange \
+    --backup-retention-period 5 \
+    --port 5432 \
+    --multi-az \
+    --engine-version 10.4 \
+    --auto-minor-version-upgrade \
+    --license-model postgresql-license \
+    --publicly-accessible
