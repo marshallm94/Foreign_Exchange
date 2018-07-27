@@ -9,5 +9,5 @@
 # │ │ │ │ │
 # * * * * *  command_to_execute
 
-# Run alpha_vantage_api.py every 15 minutes, Monday through Friday.
-*/15 * * * 1-5 python ~/data_science_projects/Foreign_Exchange/src/python alpha_vantage_api.py
+# Run alpha_vantage_api.py every 15 minutes, Monday through Friday (connect to AWS RDS).
+*/15 * * * 1-5 /usr/bin/python ~/data_science_projects/Foreign_Exchange/src/alpha_vantage_api.py
