@@ -50,9 +50,15 @@ def format_api_response(from_curr_code, to_curr_code='USD', link="https://www.al
 
 
 if __name__ == "__main__":
+    # if on local:
     with open("/Users/marsh/api_keys/alpha_vantage_api.json", 'r') as f:
         data = json.load(f)
         api_key = data['api']
+
+    # if on VM:
+    # with open("/home/hadoop/Foreign_Exchange/src/alpha_vantage_api.json", 'r') as f:
+    #     data = json.load(f)
+    #     api_key = data['api']
 
     connection = psycopg2.connect(host='foreign-exchange.cknsthfbpmik.us-east-1.rds.amazonaws.com',
                          dbname='forex',
