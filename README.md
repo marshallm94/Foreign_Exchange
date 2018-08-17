@@ -1,8 +1,10 @@
 # Foreign Exchange
 
+###### Status: **In Progress** | August 2018
+
 Python based Foreign Exchange Analysis
 
-###### Setup
+#### Setup
 
 1. Navigate to `Foreign_Exchange/src/bash_scripts/` and run `$ bash launch_cluster.sh` from the command line to create an EMR cluster on AWS.
 
