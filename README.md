@@ -2,7 +2,7 @@
 
 ###### Status: **In Progress** | August 2018
 
-Python based Foreign Exchange Analysis
+Python & AWS based Foreign Exchange Analysis
 
 #### Setup
 
