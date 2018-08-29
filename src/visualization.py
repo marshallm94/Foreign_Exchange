@@ -1,10 +1,27 @@
-import pyspark as ps
+import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
+import matplotlib.dates as mdates
 import seaborn as sns
 import psycopg2
+import pyspark as ps
 
 def get_rates(currency_code='all'):
+    '''
+    Returns exchange rate information from the specified currency to USD.
+
+    Parameters
+    ----------
+    currency_code : (str)
+        Exchange rate identifier. Options include 'JPY', 'CHF', 'EUR' and 'GBP'.
+        If you would like all returned in one DataFrame, use 'all'.
+
+    Returns
+    ----------
+    df : (Pandas DataFrame)
+        DataFrame containing exchange rate information from the specified
+        currency code.
+    '''
     connection = psycopg2.connect(host='foreign-exchange.cknsthfbpmik.us-east-1.rds.amazonaws.com',
                          dbname='forex',
                          user='awsuser',
@@ -34,16 +51,48 @@ def get_rates(currency_code='all'):
     connection.commit()
     connection.close()
 
+    df.set_index('last_refreshed', inplace=True)
+
     return df
+
+
+def plot_date_range(df, start_date, end_date=False):
+    start_mask = df.index >= start_date
+    if end_date:
+        end_mask = df.index <= end_date
+        display_df = df[start_mask & end_mask].copy()
+    else:
+        display_df = df[start_mask].copy()
+
+    days = mdates.DateLocator()
+    fig, ax = plt.subplots(figsize=(12,8))
+
+    ax.plot(display_df.index, display_df['exchange_rate'])
+    ax.xaxis.set_major_formatter(mdates.DateFormatter('%m-%d'))
+    ax.xaxis.set_minor_locator(mdates.HourLocator())
+    ax.yaxis.set_label_coords(-0.115,0.5)
+
+    title = np.unique(display_df['from_currency_code'])[0] + ":" + "USD"
+    plt.suptitle(title, fontweight='bold', fontsize=19)
+    plt.xlabel('Date', fontweight='bold', fontsize=15)
+    plt.ylabel("Rate", fontweight='bold', rotation=0, fontsize=15)
+
+    fig.autofmt_xdate()
+    plt.show()
 
 
 if __name__ == "__main__":
 
     japan_df = get_rates('JPY')
-    swiss_df = get_rate('CHF')
+    swiss_df = get_rates('CHF')
     euro_df = get_rates('EUR')
-    german_df = get_rates('GBP')
-    
+    british_df = get_rates('GBP')
+
+    plot_date_range(japan_df, start_date='2018-08-20', end_date='2018-08-28')
+    plot_date_range(swiss_df, start_date='2018-08-20', end_date='2018-08-28')
+    plot_date_range(euro_df, start_date='2018-08-20', end_date='2018-08-28')
+    plot_date_range(british_df, start_date='2018-08-20', end_date='2018-08-28')
+
     # spark = ps.sql.SparkSession.builder.master('local[4]').appName('Foreign Exchange').getOrCreate()
     #
     # sc = spark.sparkContext
