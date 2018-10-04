@@ -18,7 +18,7 @@ with connection.cursor() as cursor:
                                                   'exchange_rate',
                                                   'last_refreshed',
                                                   'time_zone'])
-    print(df)
+    df.to_csv("final_data_10_03_2018.csv", index=False)
 
 connection.commit()
 connection.close()

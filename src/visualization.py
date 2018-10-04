@@ -5,6 +5,7 @@ import matplotlib.dates as mdates
 import seaborn as sns
 import psycopg2
 import pyspark as ps
+import datetime as dt
 
 def get_rates(currency_code='all'):
     '''
@@ -40,13 +41,14 @@ def get_rates(currency_code='all'):
             FROM public.majors
             WHERE from_currency_code = '{}';
             """.format(currency_code))
-        df = pd.DataFrame(cursor.fetchall(), columns=['from_currency_code',
-                                                      'from_currency_name',
-                                                      'to_currency_code',
-                                                      'to_currency_name',
-                                                      'exchange_rate',
-                                                      'last_refreshed',
-                                                      'time_zone'])
+        df = pd.DataFrame(cursor.fetchall(),
+                          columns=['from_currency_code',
+                                   'from_currency_name',
+                                   'to_currency_code',
+                                   'to_currency_name',
+                                   'exchange_rate',
+                                   'last_refreshed',
+                                   'time_zone'])
 
     connection.commit()
     connection.close()
@@ -81,12 +83,17 @@ def plot_date_range(df, start_date, end_date=False):
     plt.show()
 
 
+def plot_single_date(date=date):
+
+
 if __name__ == "__main__":
 
-    japan_df = get_rates('JPY')
-    swiss_df = get_rates('CHF')
-    euro_df = get_rates('EUR')
-    british_df = get_rates('GBP')
+    master_df = get_rates()
+
+    japan_df = master_df[master_df['from_currency_code'] == 'JPY']
+    swiss_df = master_df[master_df['from_currency_code'] == 'CHF']
+    euro_df = master_df[master_df['from_currency_code'] == 'EUR']
+    british_df = master_df[master_df['from_currency_code'] == 'GBP']
 
     plot_date_range(japan_df, start_date='2018-08-20', end_date='2018-08-28')
     plot_date_range(swiss_df, start_date='2018-08-20', end_date='2018-08-28')
