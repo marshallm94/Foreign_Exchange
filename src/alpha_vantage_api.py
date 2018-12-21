@@ -5,7 +5,7 @@ import time
 import pandas as pd
 
 
-def format_api_response(from_curr_code, to_curr_code='USD', link="https://www.alphavantage.co/query"):
+def format_api_response(from_curr_code, api_key, to_curr_code='USD', link="https://www.alphavantage.co/query"):
     '''
     Formats the response from the Alpha Vantage API.
 
@@ -68,7 +68,7 @@ if __name__ == "__main__":
 
     currencies = set(['EUR','JPY','GBP','CHF'])
     for curr in currencies:
-        results_dict = format_api_response(curr)
+        results_dict = format_api_response(curr, api_key)
         with connection.cursor() as cursor:
             cursor.execute("""
             INSERT INTO public.majors

@@ -70,9 +70,9 @@ def plot_date_range(df, start_date, end_date=False):
     fig, ax = plt.subplots(figsize=(12,8))
 
     ax.plot(display_df.index, display_df['exchange_rate'])
-    ax.xaxis.set_major_formatter(mdates.DateFormatter('%m-%d'))
-    ax.xaxis.set_minor_locator(mdates.HourLocator())
-    ax.yaxis.set_label_coords(-0.115,0.5)
+    # ax.xaxis.set_major_formatter(mdates.DateFormatter('%m-%d'))
+    # ax.xaxis.set_minor_locator(mdates.HourLocator())
+    # ax.yaxis.set_label_coords(-0.115,0.5)
 
     title = np.unique(display_df['from_currency_code'])[0] + ":" + "USD"
     plt.suptitle(title, fontweight='bold', fontsize=19)
@@ -83,20 +83,25 @@ def plot_date_range(df, start_date, end_date=False):
     plt.show()
 
 
-def plot_single_date(date=date):
+def plot_single_date(date):
+    pass
 
 
 if __name__ == "__main__":
 
-    master_df = get_rates()
+    # master_df = get_rates()
+
+    master_df = pd.read_csv("../data/final_data_10_03_2018.csv")
+
+    master_df.set_index('last_refreshed', inplace=True)
 
     japan_df = master_df[master_df['from_currency_code'] == 'JPY']
     swiss_df = master_df[master_df['from_currency_code'] == 'CHF']
     euro_df = master_df[master_df['from_currency_code'] == 'EUR']
     british_df = master_df[master_df['from_currency_code'] == 'GBP']
 
-    plot_date_range(japan_df, start_date='2018-08-20', end_date='2018-08-28')
-    plot_date_range(swiss_df, start_date='2018-08-20', end_date='2018-08-28')
+    plot_date_range(japan_df, start_date='2018-09-20', end_date='2018-09-28')
+    plot_date_range(swiss_df, start_date='2018-09-20', end_date='2018-09-28')
     plot_date_range(euro_df, start_date='2018-08-20', end_date='2018-08-28')
     plot_date_range(british_df, start_date='2018-08-20', end_date='2018-08-28')
 

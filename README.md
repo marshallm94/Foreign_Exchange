@@ -1,8 +1,6 @@
 # Foreign Exchange
 
-###### Status: **In Progress** | August 2018
-
-Python & AWS based Foreign Exchange Analysis
+Python & AWS based Foreign Exchange Data Pipeline
 
 #### Setup
 

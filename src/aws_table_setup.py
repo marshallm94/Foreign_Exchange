@@ -14,7 +14,7 @@ with connection.cursor() as cursor:
         to_currency_code CHAR(3),
         to_currency_name TEXT,
         exchange_rate NUMERIC,
-        last_refreshed TIMESTAMP,
+        last_refreshed TIMESTAMP PRIMARY KEY,
         time_zone CHAR(3)
     );
     """)
